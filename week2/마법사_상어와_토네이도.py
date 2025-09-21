@@ -1,3 +1,5 @@
+# 20057
+
 import sys
 import math
 input = sys.stdin.readline
@@ -47,17 +49,22 @@ def move(vec, pos):
     global out_sand
     if vec == 0:  # left
         tornado = tLeft
+        nextPos = (pos[0], pos[1] - 1)
     elif vec == 1:  # down
         tornado = tDown
+        nextPos = (pos[0] + 1, pos[1])
     elif vec == 2:  # right
         tornado = tRight
+        nextPos = (pos[0], pos[1] + 1)
     elif vec == 3:  # up
         tornado = tUp
-    
-    sand = grid[pos[0]][pos[1]]
+        nextPos = (pos[0] - 1, pos[1])
+
+    # 토네이도가 이동할 다음 위치의 모래를 뿌림
+    sand = grid[nextPos[0]][nextPos[1]]
     if sand == 0:
-        return
-    grid[pos[0]][pos[1]] = 0
+        return nextPos
+    grid[nextPos[0]][nextPos[1]] = 0
     
     total_scattered = 0
     for i in range(5):
@@ -65,8 +72,8 @@ def move(vec, pos):
             if tornado[i][j] == -1:
                 continue
             
-            ni = pos[0] + i - 2
-            nj = pos[1] + j - 2
+            ni = nextPos[0] + i - 2
+            nj = nextPos[1] + j - 2
             
             if tornado[i][j] == 0:
                 continue
@@ -77,15 +84,63 @@ def move(vec, pos):
             else:
                 temp = math.floor(sand * tornado[i][j])
                 total_scattered += temp
-                if grid[ni][nj] != -1:
+                if 0 <= ni < len(grid) and 0 <= nj < len(grid[0]) and grid[ni][nj] != -1:
                     grid[ni][nj] += temp
                 else:
                     out_sand += temp
                     
     # 나머지 모래 alpha로
     remaining_sand = sand - total_scattered
-    if grid[alpha_ni][alpha_nj] != -1:
+    if 0 <= alpha_ni < len(grid) and 0 <= alpha_nj < len(grid[0]) and grid[alpha_ni][alpha_nj] != -1:
         grid[alpha_ni][alpha_nj] += remaining_sand
     else:
         out_sand += remaining_sand
 
+    return nextPos
+
+startNum = N//2 + 2
+pos = (startNum, startNum)
+vec = 0
+moveamount = 1
+while pos != (2, 2):
+    # 왼쪽으로 moveamount만큼
+    for _ in range(moveamount):
+        pos = move(vec, pos)
+        if pos == (2, 2):
+            break
+    if pos == (2, 2):
+        break
+
+    # 아래로 moveamount만큼
+    vec = (vec + 1) % 4  # down
+    for _ in range(moveamount):
+        pos = move(vec, pos)
+        if pos == (2, 2):
+            break
+    if pos == (2, 2):
+        break
+
+    moveamount += 1
+
+    # 오른쪽으로 moveamount만큼
+    vec = (vec + 1) % 4  # right
+    for _ in range(moveamount):
+        pos = move(vec, pos)
+        if pos == (2, 2):
+            break
+    if pos == (2, 2):
+        break
+
+    # 위로 moveamount만큼
+    vec = (vec + 1) % 4  # up
+    for _ in range(moveamount):
+        pos = move(vec, pos)
+        if pos == (2, 2):
+            break
+    if pos == (2, 2):
+        break
+
+    moveamount += 1
+    vec = (vec + 1) % 4  # left
+
+print(out_sand)
